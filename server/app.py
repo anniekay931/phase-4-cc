@@ -54,5 +54,74 @@ def restaurantById(id):
 
     return response
 
+@app.route('/restaurants/<string:id>', methods=['DELETE'])
+def deleteRestaurant(id):
+    restaurant = Restaurant.query.filter_by(id=id).first()
+
+    if restaurant:
+        RestaurantPizza.query.filter_by(restaurant_id=id).delete()
+        db.session.delete(restaurant)
+        db.session.commit()
+
+        response = make_response('', 204)
+    else:
+        response = make_response(
+            {"error": "Restaurant not found"},
+            404
+        )
+
+    return response
+
+@app.route('/pizzas')
+def pizzas():
+    pizzas = Pizza.query.all()
+    pizzas_dict = [pizza.to_dict() for pizza in pizzas]
+
+    response = make_response(
+        jsonify(pizzas_dict),
+        200
+    )
+
+    return response
+
+@app.route('/restaurant_pizzas', methods=['POST'])
+def restaurant_pizzas():
+    try:
+        price = int(request.form['price'])
+        if price < 1 or price > 30:
+            raise ValueError
+
+        pizza_id = int(request.form['pizza_id'])
+        restaurant_id = int(request.form['restaurant_id'])
+
+        pizza = Pizza.query.get(pizza_id)
+        restaurant = Restaurant.query.get(restaurant_id)
+
+        if not pizza or not restaurant:
+            raise ValueError
+
+        new_restaurant_pizza = RestaurantPizza(
+            price=price,
+            pizza_id=pizza_id,
+            restaurant_id=restaurant_id
+        )
+        db.session.add(new_restaurant_pizza)
+        db.session.commit()
+
+        restaurant_pizza_dict = new_restaurant_pizza.to_dict()
+
+        response = make_response(
+            jsonify(restaurant_pizza_dict),
+            201
+        )
+
+    except (ValueError, KeyError):
+        response = make_response(
+            {"error": "Invalid input"},
+            400
+        )
+
+    return response
+
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
