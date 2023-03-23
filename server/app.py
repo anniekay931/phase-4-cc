@@ -33,5 +33,26 @@ def restaurants():
 
     return response
 
+@app.route('/restaurants/<string:id>')
+def restaurantById(id):
+    restaurant = Restaurant.query.filter_by(id=id).first()
+
+    if restaurant:
+        restaurant_dict = restaurant.to_dict()
+        restaurant_dict['pizzas'] = [restaurant_pizza.pizza.to_dict() for restaurant_pizza in restaurant.restaurant_pizzas]
+
+        response = make_response(
+            jsonify(restaurant_dict),
+            200
+        )
+
+    else:
+        response = make_response(
+            {"error": "Restaurant not found"},
+            404
+        )
+
+    return response
+
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
