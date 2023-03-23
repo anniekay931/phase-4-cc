@@ -23,8 +23,15 @@ def index():
 
 @app.route('/restaurants')
 def restaurants():
+    restaurants = Restaurant.query.all()
+    restaurants_dict = [restaurant.to_dict() for restaurant in restaurants]
 
-    pass
+    response = make_response(
+        jsonify(restaurants_dict),
+        200
+    )
+
+    return response
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
