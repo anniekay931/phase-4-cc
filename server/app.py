@@ -3,6 +3,7 @@
 from flask import Flask, make_response, jsonify, request
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
+from sqlalchemy.orm import sessionmaker
 
 from models import db, Restaurant, RestaurantPizza, Pizza
 
@@ -54,36 +55,6 @@ def restaurantById(id):
 
     return response
 
-@app.route('/restaurants/<string:id>', methods=['DELETE'])
-def deleteRestaurant(id):
-    restaurant = Restaurant.query.filter_by(id=id).first()
-
-    if restaurant:
-        RestaurantPizza.query.filter_by(restaurant_id=id).delete()
-        db.session.delete(restaurant)
-        db.session.commit()
-
-        response = make_response('', 204)
-    else:
-        response = make_response(
-            {"error": "Restaurant not found"},
-            404
-        )
-
-    return response
-
-@app.route('/pizzas')
-def pizzas():
-    pizzas = Pizza.query.all()
-    pizzas_dict = [pizza.to_dict() for pizza in pizzas]
-
-    response = make_response(
-        jsonify(pizzas_dict),
-        200
-    )
-
-    return response
-
 @app.route('/restaurant_pizzas', methods=['POST'])
 def restaurant_pizzas():
     try:
@@ -122,6 +93,7 @@ def restaurant_pizzas():
         )
 
     return response
+
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
