@@ -34,7 +34,7 @@ def restaurants():
 
     return response
 
-@app.route('/restaurants/<string:id>')
+@app.route('/restaurants/<int:id>')
 def restaurantById(id):
     restaurant = Restaurant.query.filter_by(id=id).first()
 
