@@ -85,15 +85,16 @@ def pizzas():
     )
 
     return response
+
 @app.route('/restaurant_pizzas', methods=['POST'])
 def restaurant_pizzas():
     try:
-        price = int(request.json['price'])
+        price = int(request.form['price'])
         if price < 1 or price > 30:
             raise ValueError
 
-        pizza_id = int(request.json['pizza_id'])
-        restaurant_id = int(request.json['restaurant_id'])
+        pizza_id = int(request.form['pizza_id'])
+        restaurant_id = int(request.form['restaurant_id'])
 
         pizza = Pizza.query.get(pizza_id)
         restaurant = Restaurant.query.get(restaurant_id)
@@ -109,16 +110,16 @@ def restaurant_pizzas():
         db.session.add(new_restaurant_pizza)
         db.session.commit()
 
-        pizza_dict = pizza.to_dict()
+        restaurant_pizza_dict = new_restaurant_pizza.to_dict()
 
         response = make_response(
-            jsonify(pizza_dict),
+            jsonify(restaurant_pizza_dict),
             201
         )
 
     except (ValueError, KeyError):
         response = make_response(
-            {"errors": ["validation errors"]},
+            {"error": "Invalid input"},
             400
         )
 
