@@ -55,6 +55,37 @@ def restaurantById(id):
 
     return response
 
+@app.route('/restaurants/<int:id>', methods=['DELETE'])
+def delete_restaurant(id):
+    restaurant = Restaurant.query.get(id)
+
+    if restaurant:
+        RestaurantPizza.query.filter_by(restaurant_id=id).delete()
+        db.session.delete(restaurant)
+        db.session.commit()
+
+        response = make_response('', 204)
+
+    else:
+        response = make_response(
+            {"error": "Restaurant not found"},
+            404
+        )
+
+    return response
+
+@app.route('/pizzas')
+def pizzas():
+    pizzas = Pizza.query.all()
+    pizzas_dict = [pizza.to_dict() for pizza in pizzas]
+
+    response = make_response(
+        jsonify(pizzas_dict),
+        200
+    )
+
+    return response
+
 @app.route('/restaurant_pizzas', methods=['POST'])
 def restaurant_pizzas():
     try:
